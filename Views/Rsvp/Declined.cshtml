@@ -1,0 +1,51 @@
+@{
+    Layout = null;
+    var name = ViewBag.GuestName as string ?? "Cher(e) invité(e)";
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Réponse enregistrée — Zineb & Driss</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            font-family: 'Lato', sans-serif;
+            background: linear-gradient(135deg, #590D22 0%, #800f2f 60%, #C9184A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .big-icon { font-size: 4rem; display: block; margin-bottom: 1rem; }
+        h1 { font-family: 'Playfair Display', serif; color: #590D22; margin-bottom: 0.5rem; }
+        .guest-name { font-family: 'Great Vibes', cursive; font-size: 2rem; color: #C9184A; }
+        p { color: #666; margin-top: 0.75rem; line-height: 1.6; }
+        .couple { font-family: 'Great Vibes', cursive; font-size: 1.6rem; color: #C9184A; margin-top: 1.5rem; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <span class="big-icon">💌</span>
+    <h1>Réponse enregistrée</h1>
+    <div class="guest-name">@name</div>
+    <p>
+        Nous sommes tristes de ne pas pouvoir partager ce moment avec vous.<br>
+        Merci de nous avoir répondu. Vous resterez dans nos cœurs ce jour-là. 💕
+    </p>
+    <div class="couple">Zineb & Driss</div>
+</div>
+</body>
+</html>

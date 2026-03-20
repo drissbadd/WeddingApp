@@ -1,0 +1,187 @@
+@model IEnumerable<Guest>
+@{
+    ViewData["Title"] = "Liste des Invités";
+    bool whatsAppOk = ViewBag.WhatsAppConfigured == true;
+}
+
+<!-- Filter Bar -->
+<form method="get" class="filter-bar d-flex flex-wrap gap-2 align-items-end">
+    <div class="flex-grow-1">
+        <label class="form-label mb-1 small fw-bold">Rechercher</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input name="search" value="@ViewBag.Search" class="form-control" placeholder="Nom ou numéro...">
+        </div>
+    </div>
+    <div>
+        <label class="form-label mb-1 small fw-bold">Statut</label>
+        <select name="status" class="form-select">
+            <option value="">Tous</option>
+            @foreach (var s in Enum.GetValues<RsvpStatus>())
+            { <option value="@s" selected="@(ViewBag.Status == s.ToString())">@s</option> }
+        </select>
+    </div>
+    <div>
+        <label class="form-label mb-1 small fw-bold">Catégorie</label>
+        <select name="category" class="form-select">
+            <option value="">Toutes</option>
+            @foreach (var c in Enum.GetValues<GuestCategory>())
+            { <option value="@c" selected="@(ViewBag.Category == c.ToString())">@c</option> }
+        </select>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-wedding"><i class="bi bi-funnel"></i> Filtrer</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<!-- Action Bar -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <span class="text-muted small">@Model.Count() invité(s) trouvé(s)</span>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        @if (!whatsAppOk)
+        {
+            <span class="badge bg-warning text-dark p-2">
+                <i class="bi bi-exclamation-triangle"></i> WhatsApp non configuré
+            </span>
+        }
+        <form asp-action="SendAllPending" method="post" onsubmit="return confirm('Envoyer les invitations à tous les invités non encore contactés ?')">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-success btn-sm" @(!whatsAppOk ? "disabled" : "")>
+                <i class="bi bi-whatsapp"></i> Envoyer à tous (non envoyés)
+            </button>
+        </form>
+        <a asp-action="ExportCsv" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Exporter CSV
+        </a>
+        <a asp-action="Create" class="btn btn-wedding btn-sm">
+            <i class="bi bi-person-plus"></i> Ajouter
+        </a>
+    </div>
+</div>
+
+<!-- Guest Table -->
+<div class="wedding-card">
+    <div class="table-responsive">
+        <table class="table wedding-table mb-0">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>WhatsApp</th>
+                    <th>Catégorie</th>
+                    <th>Statut RSVP</th>
+                    <th>Repas</th>
+                    <th>+1</th>
+                    <th>Table</th>
+                    <th>Invitation</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var g in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@g.Name</td>
+                        <td class="text-muted small">@g.PhoneNumber</td>
+                        <td><span class="badge-cat cat-@g.Category">@g.Category</span></td>
+                        <td>
+                            @if (g.Status == RsvpStatus.Confirmed)
+                            { <span class="badge-confirmed">✓ Confirmé</span> }
+                            else if (g.Status == RsvpStatus.Declined)
+                            { <span class="badge-declined">✗ Décliné</span> }
+                            else
+                            { <span class="badge-pending">⏳ En attente</span> }
+                        </td>
+                        <td class="small">@g.MealPreference</td>
+                        <td class="small">
+                            @if (g.HasPlusOne)
+                            {
+                                @(string.IsNullOrEmpty(g.PlusOneName) ? "✓ (nom non saisi)" : g.PlusOneName)
+                            }
+                            else { <span class="text-muted">–</span> }
+                        </td>
+                        <td class="small">@(g.TableNumber?.ToString() ?? "–")</td>
+                        <td class="small">
+                            @if (g.InvitationSent)
+                            { <span class="text-success" title="@g.InvitationSentAt?.ToString("dd/MM/yyyy HH:mm")"><i class="bi bi-check-circle-fill"></i> Envoyée</span> }
+                            else
+                            { <span class="text-muted"><i class="bi bi-clock"></i> Non envoyée</span> }
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                <!-- Copy RSVP Link -->
+                                <button class="btn btn-outline-secondary btn-sm" title="Copier le lien RSVP"
+                                    onclick="copyRsvpLink(@g.Id, this)">
+                                    <i class="bi bi-link-45deg"></i>
+                                </button>
+
+                                <!-- QR Code -->
+                                <a asp-action="QrCode" asp-route-id="@g.Id" class="btn btn-outline-info btn-sm" title="Télécharger QR Code" target="_blank">
+                                    <i class="bi bi-qr-code"></i>
+                                </a>
+
+                                <!-- Send WhatsApp -->
+                                <form asp-action="SendInvitation" asp-route-id="@g.Id" method="post"
+                                    onsubmit="return confirm('Envoyer une invitation WhatsApp à @g.Name ?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success btn-sm" title="Envoyer WhatsApp" @(!whatsAppOk ? "disabled" : "")>
+                                        <i class="bi bi-whatsapp"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Edit -->
+                                <a asp-action="Edit" asp-route-id="@g.Id" class="btn btn-wedding btn-sm" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <!-- Delete -->
+                                <form asp-action="Delete" asp-route-id="@g.Id" method="post"
+                                    onsubmit="return confirm('Supprimer @g.Name de la liste ?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-person-x fs-1 d-block mb-2" style="opacity:.3"></i>
+                Aucun invité trouvé. <a asp-action="Create">Ajouter le premier invité</a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Toast for link copy -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+    <div id="copyToast" class="toast align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body"><i class="bi bi-check-circle me-2"></i>Lien RSVP copié !</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+async function copyRsvpLink(id, btn) {
+    try {
+        const res = await fetch(`/Guests/GetRsvpLink/${id}`);
+        const data = await res.json();
+        await navigator.clipboard.writeText(data.link);
+        const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+        toast.show();
+    } catch(e) {
+        alert('Impossible de copier le lien. Essayez manuellement.');
+    }
+}
+</script>
+}

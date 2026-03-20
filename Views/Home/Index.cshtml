@@ -1,0 +1,203 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Tableau de Bord";
+}
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card position-relative">
+            <div class="stat-icon"><i class="bi bi-people"></i></div>
+            <div class="stat-number">@Model.TotalGuests</div>
+            <div class="stat-label">Total Invités</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card green position-relative">
+            <div class="stat-icon" style="color:#28a745"><i class="bi bi-check-circle"></i></div>
+            <div class="stat-number" style="color:#28a745">@Model.Confirmed</div>
+            <div class="stat-label">Confirmés</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card gray position-relative">
+            <div class="stat-icon" style="color:#6c757d"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-number" style="color:#6c757d">@Model.Pending</div>
+            <div class="stat-label">En Attente</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card gold position-relative">
+            <div class="stat-icon" style="color:#D4AF37"><i class="bi bi-star"></i></div>
+            <div class="stat-number" style="color:#D4AF37">@Model.TotalAttending</div>
+            <div class="stat-label">Présences totales (+ accompagnants)</div>
+        </div>
+    </div>
+</div>
+
+<!-- Second stats row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="wedding-card p-3 text-center">
+            <div class="fs-3 mb-1" style="color:var(--rose)"><i class="bi bi-whatsapp"></i></div>
+            <div class="fw-bold fs-5">@Model.InvitationsSent</div>
+            <div class="text-muted small">Invitations Envoyées</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wedding-card p-3 text-center">
+            <div class="fs-3 mb-1" style="color:#dc3545"><i class="bi bi-x-circle"></i></div>
+            <div class="fw-bold fs-5">@Model.Declined</div>
+            <div class="text-muted small">Déclinés</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wedding-card p-3 text-center">
+            <div class="fs-3 mb-1" style="color:var(--gold)"><i class="bi bi-envelope-check"></i></div>
+            <div class="fw-bold fs-5">@(Model.TotalGuests - Model.InvitationsSent)</div>
+            <div class="text-muted small">Pas encore invités</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="wedding-card p-3 text-center">
+            <div class="fs-3 mb-1" style="color:var(--rose)"><i class="bi bi-percent"></i></div>
+            <div class="fw-bold fs-5">
+                @(Model.InvitationsSent > 0 ? $"{(Model.Confirmed * 100 / Model.InvitationsSent)}%" : "–")
+            </div>
+            <div class="text-muted small">Taux de confirmation</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-5">
+        <div class="wedding-card">
+            <div class="card-header">Statut des RSVP</div>
+            <div class="p-3" style="height:260px;">
+                <canvas id="rsvpChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="wedding-card">
+            <div class="card-header">Par Catégorie</div>
+            <div class="p-3" style="height:260px;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="wedding-card">
+            <div class="card-header">Préférences Repas</div>
+            <div class="p-3" style="height:260px;">
+                <canvas id="mealChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent RSVPs -->
+@if (Model.RecentRsvps.Any())
+{
+    <div class="wedding-card">
+        <div class="card-header"><i class="bi bi-clock-history me-2"></i>RSVP Récents</div>
+        <div class="table-responsive">
+            <table class="table wedding-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Invité</th>
+                        <th>Statut</th>
+                        <th>Catégorie</th>
+                        <th>Repas</th>
+                        <th>+1</th>
+                        <th>Le</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var g in Model.RecentRsvps)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@g.Name</td>
+                            <td>
+                                @if (g.Status == RsvpStatus.Confirmed)
+                                { <span class="badge-confirmed">✓ Confirmé</span> }
+                                else if (g.Status == RsvpStatus.Declined)
+                                { <span class="badge-declined">✗ Décliné</span> }
+                                else
+                                { <span class="badge-pending">⏳ En attente</span> }
+                            </td>
+                            <td><span class="badge-cat cat-@g.Category">@g.Category</span></td>
+                            <td>@g.MealPreference</td>
+                            <td>@(string.IsNullOrEmpty(g.PlusOneName) ? "–" : g.PlusOneName)</td>
+                            <td class="text-muted small">@g.RsvpAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-hourglass fs-1 d-block mb-2" style="opacity:.3"></i>
+        Aucun RSVP reçu pour l'instant. Envoyez vos invitations !
+    </div>
+}
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const rsvpData = {
+    confirmed: @Model.Confirmed,
+    declined:  @Model.Declined,
+    pending:   @Model.Pending
+};
+const categoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ByCategory));
+const mealData     = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ByMeal));
+
+// RSVP Donut Chart
+new Chart(document.getElementById('rsvpChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Confirmés', 'Déclinés', 'En attente'],
+        datasets: [{ data: [rsvpData.confirmed, rsvpData.declined, rsvpData.pending],
+            backgroundColor: ['#28a745','#dc3545','#ffc107'],
+            borderWidth: 0, hoverOffset: 8 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 } } } } }
+});
+
+// Category Bar Chart
+const catLabels = Object.keys(categoryData);
+const catValues = Object.values(categoryData);
+new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+        labels: catLabels,
+        datasets: [{ data: catValues, backgroundColor: ['#c9184a','#ff758f','#d4af37','#590d22'],
+            borderRadius: 8, borderSkipped: false }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false } }, y: { grid: { display: false } } } }
+});
+
+// Meal Pie Chart
+const mealLabels = Object.keys(mealData);
+const mealValues = Object.values(mealData);
+new Chart(document.getElementById('mealChart'), {
+    type: 'pie',
+    data: {
+        labels: mealLabels,
+        datasets: [{ data: mealValues,
+            backgroundColor: ['#c9184a','#28a745','#17a2b8','#ffc107'],
+            borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } } }
+});
+</script>
+}

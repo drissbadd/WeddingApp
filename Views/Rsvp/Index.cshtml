@@ -1,0 +1,399 @@
+@model Guest
+@{
+    Layout = null;
+    var weddingDate = ViewBag.WeddingDate as string ?? "2025-09-20";
+    var venue = ViewBag.Venue as string ?? "";
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>Invitation — Zineb & Driss</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Lato', sans-serif;
+            background: linear-gradient(135deg, #590D22 0%, #800f2f 35%, #C9184A 70%, #ff758f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating petals */
+        .petals { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .petal {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.15;
+            animation: fall linear infinite;
+        }
+        @@keyframes fall {
+            0%   { transform: translateY(-60px) rotate(0deg); opacity: 0; }
+            10%  { opacity: 0.15; }
+            90%  { opacity: 0.1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 24px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            overflow: hidden;
+        }
+
+        .card-hero {
+            background: linear-gradient(150deg, #590D22, #C9184A);
+            padding: 2.5rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+        .card-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 0; right: 0;
+            height: 40px;
+            background: rgba(255,255,255,0.97);
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+
+        .ornament { font-size: 1.6rem; color: #D4AF37; display: block; margin-bottom: 0.5rem; letter-spacing: 4px; }
+
+        .couple-names {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.4rem;
+            color: white;
+            line-height: 1.1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .wedding-word {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 0.4rem;
+        }
+
+        .card-body { padding: 2rem 2rem 1.5rem; }
+
+        .greeting {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .greeting .dear {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+        }
+        .greeting .guest-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #590D22;
+            margin: 0.2rem 0;
+        }
+        .greeting .message {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Countdown */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .countdown-item {
+            text-align: center;
+            background: linear-gradient(135deg, #fff0f3, #fff);
+            border: 1px solid #f5c0cd;
+            border-radius: 12px;
+            padding: 0.75rem 0.6rem;
+            min-width: 64px;
+        }
+        .countdown-item .num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #C9184A;
+            line-height: 1;
+        }
+        .countdown-item .lbl {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        /* Venue */
+        .venue-info {
+            background: #fff8f0;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .venue-info .icon { font-size: 1.4rem; color: #D4AF37; }
+
+        /* Already responded */
+        .already-responded {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+        }
+        .already-responded.confirmed { background: #d4edda; color: #155724; }
+        .already-responded.declined  { background: #f8d7da; color: #721c24; }
+        .already-responded .big-icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+
+        /* RSVP Form */
+        .rsvp-section { margin-top: 0.5rem; }
+        .rsvp-question {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn-confirm {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(40,167,69,0.3); }
+
+        .btn-decline {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background: transparent;
+            color: #999;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-decline:hover { border-color: #dc3545; color: #dc3545; }
+
+        /* Meal & +1 section (hidden by default) */
+        .extra-options {
+            display: none;
+            background: #fafafa;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid #f0e0e5;
+        }
+        .extra-options.show { display: block; animation: fadeIn 0.3s ease; }
+        @@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-label { font-size: 0.85rem; font-weight: 700; color: #590D22; margin-bottom: 0.3rem; display: block; }
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.6rem 0.9rem;
+            border-radius: 10px;
+            border: 1.5px solid #e0c0cc;
+            font-size: 0.9rem;
+            margin-bottom: 0.9rem;
+        }
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #C9184A;
+            box-shadow: 0 0 0 3px rgba(201,24,74,0.1);
+        }
+
+        .card-footer-note {
+            text-align: center;
+            color: #bbb;
+            font-size: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #f5e0e5;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Floating petals -->
+<div class="petals" id="petals"></div>
+
+<div class="card">
+    <div class="card-hero">
+        <span class="ornament">✦ ♥ ✦</span>
+        <div class="couple-names">Zineb & Driss</div>
+        <div class="wedding-word">Mariage</div>
+    </div>
+
+    <div class="card-body">
+        <div class="greeting">
+            <div class="dear">Invitation pour</div>
+            <div class="guest-name">@Model.Name</div>
+            <p class="message">
+                Nous avons l'immense joie de vous convier à la célébration de notre union.
+                Votre présence serait pour nous le plus beau des cadeaux.
+            </p>
+        </div>
+
+        <!-- Countdown Timer -->
+        <div class="countdown">
+            <div class="countdown-item"><div class="num" id="cd-days">––</div><div class="lbl">Jours</div></div>
+            <div class="countdown-item"><div class="num" id="cd-hours">––</div><div class="lbl">Heures</div></div>
+            <div class="countdown-item"><div class="num" id="cd-min">––</div><div class="lbl">Min</div></div>
+            <div class="countdown-item"><div class="num" id="cd-sec">––</div><div class="lbl">Sec</div></div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(venue))
+        {
+            <div class="venue-info">
+                <span class="icon">📍</span>
+                <span>@venue</span>
+            </div>
+        }
+
+        <!-- RSVP Section -->
+        @if (Model.Status == RsvpStatus.Confirmed)
+        {
+            <div class="already-responded confirmed">
+                <span class="big-icon">✅</span>
+                <strong>Vous avez confirmé votre présence !</strong>
+                <p class="mt-1" style="font-size:.9rem">Nous avons hâte de vous retrouver. Merci ! 💕</p>
+            </div>
+        }
+        else if (Model.Status == RsvpStatus.Declined)
+        {
+            <div class="already-responded declined">
+                <span class="big-icon">💔</span>
+                <strong>Vous nous avez informés de votre absence.</strong>
+                <p class="mt-1" style="font-size:.9rem">Nous vous remercions de nous avoir répondu.</p>
+            </div>
+        }
+        else
+        {
+            <div class="rsvp-section">
+                <div class="rsvp-question">Serez-vous présent(e) à notre mariage ?</div>
+
+                <!-- Confirm button shows extra options -->
+                <button class="btn-confirm" onclick="showConfirmForm()">
+                    ✓ &nbsp; Oui, je serai présent(e) !
+                </button>
+
+                <!-- Extra options (meal, +1) -->
+                <div class="extra-options" id="confirmForm">
+                    <form asp-controller="Rsvp" asp-action="Confirm" asp-route-token="@Model.RsvpToken" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <label class="form-label">🍽️ Préférence de repas</label>
+                        <select name="mealPreference" class="form-select">
+                            @foreach (var m in Enum.GetValues<MealPreference>())
+                            {
+                                <option value="@m" selected="@(m == Model.MealPreference)">@m</option>
+                            }
+                        </select>
+
+                        @if (Model.HasPlusOne)
+                        {
+                            <label class="form-label">👫 Nom de votre accompagnant(e)</label>
+                            <input type="text" name="plusOneName" class="form-control"
+                                value="@Model.PlusOneName" placeholder="Prénom et Nom" />
+                        }
+
+                        <button type="submit" class="btn-confirm" style="margin-top:0.5rem">
+                            ✓ &nbsp; Confirmer ma présence
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Decline -->
+                <form asp-controller="Rsvp" asp-action="Decline" asp-route-token="@Model.RsvpToken" method="post"
+                    onsubmit="return confirm('Êtes-vous sûr(e) de ne pas pouvoir venir ?')">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-decline">
+                        ✗ &nbsp; Je ne pourrai malheureusement pas venir
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+
+    <div class="card-footer-note">
+        Avec tout notre amour — Zineb & Driss 💕
+    </div>
+</div>
+
+<script>
+// Countdown
+const weddingDate = new Date('@weddingDate');
+function updateCountdown() {
+    const now = new Date();
+    const diff = weddingDate - now;
+    if (diff <= 0) {
+        document.getElementById('cd-days').textContent = '0';
+        document.getElementById('cd-hours').textContent = '0';
+        document.getElementById('cd-min').textContent = '0';
+        document.getElementById('cd-sec').textContent = '0';
+        return;
+    }
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const min   = Math.floor((diff % 3600000) / 60000);
+    const sec   = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cd-days').textContent  = days;
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cd-min').textContent   = String(min).padStart(2,'0');
+    document.getElementById('cd-sec').textContent   = String(sec).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// Show confirm form
+function showConfirmForm() {
+    document.getElementById('confirmForm').classList.add('show');
+    document.getElementById('confirmForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Floating petals
+const symbols = ['🌸','✿','🌺','❀','♥','🌷'];
+const container = document.getElementById('petals');
+for (let i = 0; i < 18; i++) {
+    const el = document.createElement('div');
+    el.className = 'petal';
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.animationDuration = (8 + Math.random() * 10) + 's';
+    el.style.animationDelay = (Math.random() * 12) + 's';
+    el.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+    container.appendChild(el);
+}
+</script>
+</body>
+</html>
