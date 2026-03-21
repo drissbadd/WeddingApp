@@ -188,7 +188,7 @@ function formatPhone(phone) {
 async function openWhatsApp(phone, id, name) {
     const res = await fetch(`/Guests/GetRsvpLink/${id}`);
     const data = await res.json();
-    const message = `Bonjour ${name} ! 🌹\n\nVous êtes cordialement invité(e) au mariage de *Zineb & Driss*.\n\n📅 20 Septembre 2025\n📍 Votre Lieu de Réception\n\nMerci de confirmer votre présence en cliquant sur le lien ci-dessous :\n👉 ${data.link}\n\nAvec tout notre amour ❤️\n*Zineb & Driss*`;
+    const message = `Bonjour ${name} !\n\nVous etes cordialement invite(e) au mariage de *Zineb & Driss*.\n\nDate : 9 Mai 2026\nLieu : La Maison Blanche - Rabat\n\nMerci de confirmer votre presence en cliquant sur le lien ci-dessous :\n${data.link}\n\nAvec tout notre amour\n*Zineb & Driss*`;
     const url = `https://wa.me/${formatPhone(phone)}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
 }
