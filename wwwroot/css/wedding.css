@@ -265,6 +265,79 @@ h1, h2, h3, h4, .brand-names {
     margin-bottom: 1.25rem;
 }
 
+/* ---- Dark Mode Toggle Button ---- */
+.dark-toggle { color: var(--rose); }
+.dark .dark-toggle { color: var(--gold); }
+
+/* ---- Dark Mode ---- */
+body.dark {
+    background: #0f0f13;
+    color: #e8e0e4;
+}
+
+body.dark .top-header {
+    background: #1a1a22;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+body.dark .header-title { color: #f4a0b5; }
+
+body.dark .main-content { }
+
+body.dark .stat-card {
+    background: #1e1e2a;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+body.dark .stat-label { color: #888; }
+
+body.dark .wedding-card {
+    background: #1e1e2a;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+body.dark .wedding-card .card-header {
+    background: #252532;
+    border-bottom-color: rgba(201,24,74,0.2);
+    color: #f4a0b5;
+}
+
+body.dark .filter-bar {
+    background: #1e1e2a;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.3);
+}
+
+body.dark .wedding-table thead th {
+    background: #252532;
+    color: #f4a0b5;
+}
+body.dark .wedding-table tbody tr:hover { background: #25202a; }
+body.dark .wedding-table td { border-color: #2a2030; color: #e8e0e4; }
+body.dark .wedding-table { color: #e8e0e4; }
+
+body.dark .form-control,
+body.dark .form-select {
+    background: #252532;
+    border-color: #3a2a35;
+    color: #e8e0e4;
+}
+body.dark .form-control:focus,
+body.dark .form-select:focus {
+    background: #252532;
+    border-color: var(--rose);
+    color: #e8e0e4;
+}
+body.dark .form-label { color: #f4a0b5; }
+
+body.dark .text-muted { color: #888 !important; }
+body.dark .fw-semibold { color: #e8e0e4; }
+
+body.dark .alert-success { background: #0f2d1a; border-color: #1a5e30; color: #75e09a; }
+body.dark .alert-danger  { background: #2d0f0f; border-color: #5e1a1a; color: #e07575; }
+
+body.dark .progress { background: #2a2035; }
+
+body.dark .btn-outline-light { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); }
+body.dark .btn-outline-secondary { border-color: #444; color: #aaa; }
+body.dark .btn-outline-secondary:hover { background: #333; color: #fff; }
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
     #sidebar { width: 0; }
