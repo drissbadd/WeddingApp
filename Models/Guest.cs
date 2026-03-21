@@ -3,7 +3,12 @@ using System.ComponentModel.DataAnnotations;
 namespace WeddingApp.Models;
 
 public enum RsvpStatus { Pending, Confirmed, Declined }
-public enum GuestCategory { Family, Friends, Colleagues, VIP }
+public enum GuestCategory
+{
+    [Display(Name = "Zineb & Driss")] ZinebDriss,
+    Ouazzani,
+    Berrada
+}
 public enum MealPreference { Halal, Standard, Vegetarian, Vegan }
 
 public class Guest

@@ -69,9 +69,7 @@
                     <th>WhatsApp</th>
                     <th>Catégorie</th>
                     <th>Statut RSVP</th>
-                    <th>Repas</th>
                     <th>+1</th>
-                    <th>Table</th>
                     <th>Invitation</th>
                     <th class="text-center">Actions</th>
                 </tr>
@@ -91,7 +89,6 @@
                             else
                             { <span class="badge-pending">⏳ En attente</span> }
                         </td>
-                        <td class="small">@g.MealPreference</td>
                         <td class="small">
                             @if (g.HasPlusOne)
                             {
@@ -99,7 +96,6 @@
                             }
                             else { <span class="text-muted">–</span> }
                         </td>
-                        <td class="small">@(g.TableNumber?.ToString() ?? "–")</td>
                         <td class="small">
                             @if (g.InvitationSent)
                             { <span class="text-success" title="@g.InvitationSentAt?.ToString("dd/MM/yyyy HH:mm")"><i class="bi bi-check-circle-fill"></i> Envoyée</span> }
