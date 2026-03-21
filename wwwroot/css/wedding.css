@@ -235,10 +235,9 @@ h1, h2, h3, h4, .brand-names {
 
 /* ---- Category badges ---- */
 .badge-cat { border-radius: 20px; padding: 0.2em 0.7em; font-size: 0.72rem; font-weight: 600; }
-.cat-Family    { background: #e3f2fd; color: #0d47a1; }
-.cat-Friends   { background: #f3e5f5; color: #6a1b9a; }
-.cat-Colleagues{ background: #e8f5e9; color: #2e7d32; }
-.cat-VIP       { background: #fff8e1; color: #f57f17; }
+.cat-ZinebDriss { background: #fce4ec; color: #880e4f; }
+.cat-Ouazzani   { background: #e8f5e9; color: #1b5e20; }
+.cat-Berrada    { background: #e3f2fd; color: #0d47a1; }
 
 /* ---- Alerts ---- */
 .wedding-alert { border-radius: 12px; font-weight: 500; }
