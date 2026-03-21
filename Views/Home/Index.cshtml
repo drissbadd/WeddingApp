@@ -3,6 +3,30 @@
     ViewData["Title"] = "Tableau de Bord";
 }
 
+<!-- Countdown -->
+<div class="wedding-card mb-4 p-4 text-center" style="background: linear-gradient(135deg, #590D22, #C9184A); color: white; border-radius: 16px;">
+    <div style="font-family: 'Playfair Display', serif; font-size: 1rem; letter-spacing: 4px; opacity: 0.85; margin-bottom: 0.5rem;">MARIAGE — 9 MAI 2026</div>
+    <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 1.2rem;">La Maison Blanche, Rabat</div>
+    <div class="d-flex justify-content-center gap-3">
+        <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 0.8rem 1.2rem; min-width: 80px;">
+            <div id="dash-days" style="font-size: 2.2rem; font-weight: 700; line-height: 1;">–</div>
+            <div style="font-size: 0.65rem; letter-spacing: 2px; opacity: 0.8; margin-top: 2px;">JOURS</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 0.8rem 1.2rem; min-width: 80px;">
+            <div id="dash-hours" style="font-size: 2.2rem; font-weight: 700; line-height: 1;">–</div>
+            <div style="font-size: 0.65rem; letter-spacing: 2px; opacity: 0.8; margin-top: 2px;">HEURES</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 0.8rem 1.2rem; min-width: 80px;">
+            <div id="dash-min" style="font-size: 2.2rem; font-weight: 700; line-height: 1;">–</div>
+            <div style="font-size: 0.65rem; letter-spacing: 2px; opacity: 0.8; margin-top: 2px;">MIN</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 0.8rem 1.2rem; min-width: 80px;">
+            <div id="dash-sec" style="font-size: 2.2rem; font-weight: 700; line-height: 1;">–</div>
+            <div style="font-size: 0.65rem; letter-spacing: 2px; opacity: 0.8; margin-top: 2px;">SEC</div>
+        </div>
+    </div>
+</div>
+
 <!-- Stats Row -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
@@ -79,19 +103,33 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-lg-7">
         <div class="wedding-card">
-            <div class="card-header">Par Catégorie</div>
-            <div class="p-3" style="height:260px;">
-                <canvas id="categoryChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-3">
-        <div class="wedding-card">
-            <div class="card-header">Préférences Repas</div>
-            <div class="p-3" style="height:260px;">
-                <canvas id="mealChart"></canvas>
+            <div class="card-header"><i class="bi bi-people me-2"></i>Confirmés par Famille</div>
+            <div class="p-3">
+                @foreach (var cat in Model.ByCategoryStatus)
+                {
+                    var total = cat.Value.Confirmed + cat.Value.Pending + cat.Value.Declined;
+                    var pct = total > 0 ? (cat.Value.Confirmed * 100 / total) : 0;
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold">@cat.Key</span>
+                            <span class="text-muted small">
+                                <span class="text-success fw-bold">@cat.Value.Confirmed ✓</span>
+                                &nbsp;·&nbsp; @cat.Value.Pending ⏳
+                                &nbsp;·&nbsp; <span class="text-danger">@cat.Value.Declined ✗</span>
+                                &nbsp;/ @total
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 10px; border-radius: 8px;">
+                            <div class="progress-bar bg-success" style="width: @pct%; border-radius: 8px;"></div>
+                        </div>
+                    </div>
+                }
+                @if (!Model.ByCategoryStatus.Any())
+                {
+                    <div class="text-center text-muted py-4">Aucun invité pour l'instant</div>
+                }
             </div>
         </div>
     </div>
@@ -109,7 +147,6 @@
                         <th>Invité</th>
                         <th>Statut</th>
                         <th>Catégorie</th>
-                        <th>Repas</th>
                         <th>+1</th>
                         <th>Le</th>
                     </tr>
@@ -128,7 +165,6 @@
                                 { <span class="badge-pending">⏳ En attente</span> }
                             </td>
                             <td><span class="badge-cat cat-@g.Category">@g.Category</span></td>
-                            <td>@g.MealPreference</td>
                             <td>@(string.IsNullOrEmpty(g.PlusOneName) ? "–" : g.PlusOneName)</td>
                             <td class="text-muted small">@g.RsvpAt?.ToString("dd/MM/yyyy HH:mm")</td>
                         </tr>
@@ -149,55 +185,30 @@ else
 @section Scripts {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const rsvpData = {
-    confirmed: @Model.Confirmed,
-    declined:  @Model.Declined,
-    pending:   @Model.Pending
-};
-const categoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ByCategory));
-const mealData     = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ByMeal));
+// Countdown
+const weddingDate = new Date('2026-05-09T18:00:00');
+function updateDashCountdown() {
+    const diff = weddingDate - new Date();
+    if (diff <= 0) return;
+    document.getElementById('dash-days').textContent  = Math.floor(diff / 86400000);
+    document.getElementById('dash-hours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+    document.getElementById('dash-min').textContent   = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    document.getElementById('dash-sec').textContent   = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+}
+updateDashCountdown();
+setInterval(updateDashCountdown, 1000);
 
 // RSVP Donut Chart
 new Chart(document.getElementById('rsvpChart'), {
     type: 'doughnut',
     data: {
         labels: ['Confirmés', 'Déclinés', 'En attente'],
-        datasets: [{ data: [rsvpData.confirmed, rsvpData.declined, rsvpData.pending],
+        datasets: [{ data: [@Model.Confirmed, @Model.Declined, @Model.Pending],
             backgroundColor: ['#28a745','#dc3545','#ffc107'],
             borderWidth: 0, hoverOffset: 8 }]
     },
     options: { responsive: true, maintainAspectRatio: false,
         plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 } } } } }
-});
-
-// Category Bar Chart
-const catLabels = Object.keys(categoryData);
-const catValues = Object.values(categoryData);
-new Chart(document.getElementById('categoryChart'), {
-    type: 'bar',
-    data: {
-        labels: catLabels,
-        datasets: [{ data: catValues, backgroundColor: ['#c9184a','#ff758f','#d4af37','#590d22'],
-            borderRadius: 8, borderSkipped: false }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-        plugins: { legend: { display: false } },
-        scales: { x: { grid: { display: false } }, y: { grid: { display: false } } } }
-});
-
-// Meal Pie Chart
-const mealLabels = Object.keys(mealData);
-const mealValues = Object.values(mealData);
-new Chart(document.getElementById('mealChart'), {
-    type: 'pie',
-    data: {
-        labels: mealLabels,
-        datasets: [{ data: mealValues,
-            backgroundColor: ['#c9184a','#28a745','#17a2b8','#ffc107'],
-            borderWidth: 2, borderColor: '#fff' }]
-    },
-    options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } } }
 });
 </script>
 }

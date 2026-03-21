@@ -11,4 +11,5 @@ public class DashboardViewModel
     public List<Guest> RecentRsvps { get; set; } = new();
     public Dictionary<string, int> ByCategory { get; set; } = new();
     public Dictionary<string, int> ByMeal { get; set; } = new();
+    public Dictionary<string, (int Confirmed, int Pending, int Declined)> ByCategoryStatus { get; set; } = new();
 }

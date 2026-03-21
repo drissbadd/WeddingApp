@@ -37,7 +37,14 @@ public class HomeController : Controller
                 .ToDictionary(g => g.Key, g => g.Count()),
             ByMeal = confirmed
                 .GroupBy(g => g.MealPreference.ToString())
-                .ToDictionary(g => g.Key, g => g.Count())
+                .ToDictionary(g => g.Key, g => g.Count()),
+            ByCategoryStatus = guests
+                .GroupBy(g => g.Category.ToString())
+                .ToDictionary(g => g.Key, g => (
+                    Confirmed: g.Count(x => x.Status == RsvpStatus.Confirmed),
+                    Pending:   g.Count(x => x.Status == RsvpStatus.Pending),
+                    Declined:  g.Count(x => x.Status == RsvpStatus.Declined)
+                ))
         };
 
         return View(vm);
