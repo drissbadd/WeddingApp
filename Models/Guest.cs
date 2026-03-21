@@ -29,7 +29,7 @@ public class Guest
     public RsvpStatus Status { get; set; } = RsvpStatus.Pending;
 
     [Display(Name = "Category")]
-    public GuestCategory Category { get; set; } = GuestCategory.Friends;
+    public GuestCategory Category { get; set; } = GuestCategory.ZinebDriss;
 
     [Display(Name = "Allow +1 Guest")]
     public bool HasPlusOne { get; set; }
