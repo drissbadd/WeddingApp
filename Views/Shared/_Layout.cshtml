@@ -45,6 +45,12 @@
         </ul>
         <div class="sidebar-footer">
             <small>Avec amour ♥</small>
+            <form method="post" action="/auth/logout" class="mt-2">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-outline-light w-100">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </form>
         </div>
     </nav>
 

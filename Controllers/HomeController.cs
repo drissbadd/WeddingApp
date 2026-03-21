@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WeddingApp.Data;
@@ -6,6 +7,7 @@ using WeddingApp.Models.ViewModels;
 
 namespace WeddingApp.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ApplicationDbContext _db;

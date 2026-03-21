@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
@@ -8,6 +9,7 @@ using WeddingApp.Services;
 
 namespace WeddingApp.Controllers;
 
+[Authorize]
 public class GuestsController : Controller
 {
     private readonly ApplicationDbContext _db;
