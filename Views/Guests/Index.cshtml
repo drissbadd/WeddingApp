@@ -47,12 +47,9 @@
                 <i class="bi bi-exclamation-triangle"></i> WhatsApp non configuré
             </span>
         }
-        <form asp-action="SendAllPending" method="post" onsubmit="return confirm('Envoyer les invitations à tous les invités non encore contactés ?')">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-success btn-sm" @(!whatsAppOk ? "disabled" : "")>
-                <i class="bi bi-whatsapp"></i> Envoyer à tous (non envoyés)
-            </button>
-        </form>
+        <button class="btn btn-success btn-sm" onclick="sendAllWhatsApp()">
+            <i class="bi bi-whatsapp"></i> Envoyer à tous (non envoyés)
+        </button>
         <a asp-action="ExportCsv" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-file-earmark-spreadsheet"></i> Exporter CSV
         </a>
@@ -123,13 +120,10 @@
                                 </a>
 
                                 <!-- Send WhatsApp -->
-                                <form asp-action="SendInvitation" asp-route-id="@g.Id" method="post"
-                                    onsubmit="return confirm('Envoyer une invitation WhatsApp à @g.Name ?')">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-success btn-sm" title="Envoyer WhatsApp" @(!whatsAppOk ? "disabled" : "")>
-                                        <i class="bi bi-whatsapp"></i>
-                                    </button>
-                                </form>
+                                <button class="btn btn-success btn-sm" title="Envoyer invitation WhatsApp"
+                                    onclick="openWhatsApp('@g.PhoneNumber', @g.Id, '@g.Name.Replace("'", "\\'")')">
+                                    <i class="bi bi-whatsapp"></i>
+                                </button>
 
                                 <!-- Edit -->
                                 <a asp-action="Edit" asp-route-id="@g.Id" class="btn btn-wedding btn-sm" title="Modifier">
@@ -181,6 +175,38 @@ async function copyRsvpLink(id, btn) {
         toast.show();
     } catch(e) {
         alert('Impossible de copier le lien. Essayez manuellement.');
+    }
+}
+
+function formatPhone(phone) {
+    let p = phone.replace(/[\s\-\.\(\)]/g, '');
+    if (p.startsWith('0')) p = '33' + p.substring(1);
+    if (p.startsWith('+')) p = p.substring(1);
+    return p;
+}
+
+async function openWhatsApp(phone, id, name) {
+    const res = await fetch(`/Guests/GetRsvpLink/${id}`);
+    const data = await res.json();
+    const message = `Bonjour ${name} ! 🌹\n\nVous êtes cordialement invité(e) au mariage de *Zineb & Driss*.\n\n📅 20 Septembre 2025\n📍 Votre Lieu de Réception\n\nMerci de confirmer votre présence en cliquant sur le lien ci-dessous :\n👉 ${data.link}\n\nAvec tout notre amour ❤️\n*Zineb & Driss*`;
+    const url = `https://wa.me/${formatPhone(phone)}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+}
+
+// Guests not yet invited - injected from server
+const pendingGuests = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    Model.Where(g => !g.InvitationSent)
+         .Select(g => new { g.Id, g.Name, g.PhoneNumber })
+         .ToList()
+));
+
+async function sendAllWhatsApp() {
+    if (pendingGuests.length === 0) { alert('Tous les invités ont déjà reçu une invitation !'); return; }
+    if (!confirm(`Ouvrir WhatsApp pour ${pendingGuests.length} invité(s) non encore contacté(s) ?`)) return;
+    for (let i = 0; i < pendingGuests.length; i++) {
+        const g = pendingGuests[i];
+        await new Promise(r => setTimeout(r, i === 0 ? 0 : 1500));
+        await openWhatsApp(g.phoneNumber, g.id, g.name);
     }
 }
 </script>
