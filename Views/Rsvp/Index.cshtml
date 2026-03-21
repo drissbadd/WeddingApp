@@ -334,14 +334,6 @@
                     <form asp-controller="Rsvp" asp-action="Confirm" asp-route-token="@Model.RsvpToken" method="post">
                         @Html.AntiForgeryToken()
 
-                        <label class="form-label">🍽️ Préférence de repas</label>
-                        <select name="mealPreference" class="form-select">
-                            @foreach (var m in Enum.GetValues<MealPreference>())
-                            {
-                                <option value="@m" selected="@(m == Model.MealPreference)">@m</option>
-                            }
-                        </select>
-
                         @if (Model.HasPlusOne)
                         {
                             <label class="form-label">👫 Nom de votre accompagnant(e)</label>
