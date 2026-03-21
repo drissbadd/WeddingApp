@@ -43,6 +43,26 @@
             font-size: 1rem;
         }
         .btn-login:hover { opacity: 0.9; color: white; }
+        .error-box {
+            background: #fff0f0;
+            border-left: 4px solid #dc3545;
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            animation: shake 0.4s ease;
+        }
+        .error-box .icon { font-size: 1.3rem; }
+        .error-box .text { color: #842029; font-size: 0.9rem; font-weight: 600; }
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-6px); }
+            40%       { transform: translateX(6px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
+        }
     </style>
 </head>
 <body>
@@ -54,7 +74,10 @@
         <div class="card-body p-4">
             @if (ViewBag.Error != null)
             {
-                <div class="alert alert-danger">@ViewBag.Error</div>
+                <div class="error-box">
+                    <span class="icon">🔒</span>
+                    <span class="text">Identifiant ou mot de passe incorrect. Veuillez réessayer.</span>
+                </div>
             }
             <form method="post" action="/auth/login">
                 @Html.AntiForgeryToken()
